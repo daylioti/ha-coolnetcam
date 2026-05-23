@@ -1,0 +1,20 @@
+name: Coolnet Cam
+version: "1.0.0"
+slug: coolnetcam
+description: Coolnet camera login + keepalive + low-latency HLS proxy
+url: https://github.com/daylioti/ha-coolnetcam
+arch:
+  - aarch64
+  - amd64
+init: false
+ports:
+  "8090/tcp": 8090
+ports_description:
+  "8090/tcp": Coolnet Cam HLS proxy and web UI
+webui: "http://[HOST]:[PORT:8090]/"
+options:
+  username: ""
+  password: ""
+schema:
+  username: str
+  password: password

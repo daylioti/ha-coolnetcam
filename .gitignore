@@ -1,0 +1,12 @@
+# Compiled Go binary (built inside the add-on Docker image, never committed)
+/coolnetcam/coolnetcam
+
+# Local Claude Code settings (may contain machine-local secrets)
+.claude/settings.local.json
+
+# Playwright MCP scratch output
+.playwright-mcp/
+
+# OS / editor noise
+.DS_Store
+*.swp

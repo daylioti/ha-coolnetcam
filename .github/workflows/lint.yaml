@@ -1,0 +1,31 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  addon:
+    name: Add-on linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint add-on
+        uses: frenck/action-addon-linter@v2
+        with:
+          path: ./coolnetcam
+
+  go:
+    name: Go build & vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - name: Build & vet
+        working-directory: ./coolnetcam
+        run: |
+          go vet ./...
+          go build ./...

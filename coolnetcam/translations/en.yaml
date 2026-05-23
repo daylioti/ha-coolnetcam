@@ -1,0 +1,7 @@
+configuration:
+  username:
+    name: Coolnet username
+    description: Your Coolnet camera account username.
+  password:
+    name: Coolnet password
+    description: Your Coolnet camera account password.
