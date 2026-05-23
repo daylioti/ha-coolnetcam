@@ -10,7 +10,6 @@
   body { background: #111; color: #eee; font-family: system-ui, sans-serif; }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
     gap: 4px;
     padding: 4px;
     height: 100vh;
@@ -76,7 +75,19 @@ const grid = document.getElementById('grid');
 fetch('/api/cameras')
   .then(r => r.json())
   .then(cameras => {
-    cameras.forEach(cam => createPlayer(cam));
+    // Balanced grid that fills the viewport for any camera count.
+    const n = cameras.length || 1;
+    const cols = Math.ceil(Math.sqrt(n));
+    const rows = Math.ceil(n / cols);
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    const els = cameras.map(cam => createPlayer(cam));
+    // Stretch a partial last row to fill the width (e.g. 3 cams = 2 + 1 wide).
+    const lastRow = n - (rows - 1) * cols;
+    if (lastRow > 0 && lastRow < cols && cols % lastRow === 0) {
+      const span = cols / lastRow;
+      els.slice(n - lastRow).forEach(el => { el.style.gridColumn = `span ${span}`; });
+    }
   });
 
 function createPlayer(cam) {
@@ -152,6 +163,8 @@ function createPlayer(cam) {
       status.classList.add('live');
     });
   }
+
+  return div;
 }
 </script>
 </body>

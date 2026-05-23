@@ -43,6 +43,15 @@ Use the Home Assistant host IP (e.g. `http://192.168.x.x:8090/...`), **not**
 `http://local-coolnetcam:.../`, so casting to a Chromecast works — the
 Chromecast fetches the stream itself and isn't on the add-on's docker network.
 
+## Low-latency dashboard view (recommended)
+
+Home Assistant's Generic Camera cards stream through HA's `stream` integration,
+which adds several seconds of buffering. For near-real-time viewing, embed the
+add-on's own player instead: add a **Webpage** (iframe) card — a full-screen
+**panel** view works well — pointing at `http://<HA-IP>:8090/`. The built-in
+grid uses a tuned low-latency player on playlists trimmed to the live edge, and
+auto-arranges into a wall that fills the screen.
+
 ## Updating
 
 After changing the add-on source, bump `version:` in `config.yaml` and push to
