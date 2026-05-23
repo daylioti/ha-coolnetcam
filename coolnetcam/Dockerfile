@@ -4,7 +4,7 @@ ARG BUILD_FROM
 FROM golang:1.26-alpine AS builder
 WORKDIR /src
 COPY go.mod ./
-COPY main.go index.html ./
+COPY main.go index.html setup.html ./
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /coolnetcam .
 
 # ---- runtime stage: Home Assistant add-on base (s6 + bashio) ----

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coolnet Cam — Setup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; color: #eee; font-family: system-ui, sans-serif; line-height: 1.5; padding: 24px; }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  a { color: #58a6ff; }
+  .lead { color: #aaa; margin-bottom: 20px; font-size: 14px; }
+  ol.steps { margin: 0 0 24px 18px; color: #ccc; font-size: 14px; }
+  ol.steps li { margin: 4px 0; }
+  .note { background: #1c2733; border-left: 3px solid #3b82f6; padding: 10px 14px; border-radius: 4px; font-size: 13px; color: #cdd9e5; margin-bottom: 24px; }
+  .cam { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+  .cam h2 { font-size: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #f44; display: inline-block; }
+  .dot.live { background: #4f4; }
+  .field { margin: 8px 0; }
+  .field label { display: block; font-size: 12px; color: #8b949e; margin-bottom: 3px; }
+  .row { display: flex; gap: 6px; }
+  .row input { flex: 1; background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 5px; padding: 7px 9px; font-family: ui-monospace, monospace; font-size: 13px; }
+  .row button { background: #238636; color: #fff; border: 0; border-radius: 5px; padding: 0 14px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+  .row button:hover { background: #2ea043; }
+  .row button.copied { background: #1f6feb; }
+  .blank { color: #8b949e; font-style: italic; font-size: 13px; }
+  .empty { color: #aaa; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Add your cameras to Home Assistant</h1>
+  <p class="lead">One Generic Camera entity per stream. <a href="/">← back to live grid</a></p>
+
+  <ol class="steps">
+    <li>In Home Assistant: <b>Settings → Devices &amp; Services → Add Integration → “Generic Camera”</b>.</li>
+    <li>Paste the <b>Stream Source URL</b> below. Leave <b>Still Image URL</b> blank.</li>
+    <li>(Optional) Use the suggested name. Finish — it creates a <code>camera.*</code> entity.</li>
+    <li>Repeat for each camera.</li>
+  </ol>
+
+  <div class="note">
+    Tip: if you reached this page via <code>homeassistant.local</code>, the URLs below use that hostname.
+    For casting to a <b>Chromecast</b>, reopen this page using your HA box's numeric IP
+    (e.g. <code>http://192.168.x.x:8090/setup</code>) so the copied URLs use the IP — Chromecast can't resolve <code>.local</code>.
+  </div>
+
+  <div id="list" class="empty">Loading cameras…</div>
+</div>
+
+<script>
+const list = document.getElementById('list');
+
+fetch('/api/cameras')
+  .then(r => r.json())
+  .then(cams => {
+    if (!cams.length) {
+      list.textContent = 'No cameras yet — check the add-on Log tab for “Logged in as …”.';
+      return;
+    }
+    list.classList.remove('empty');
+    list.innerHTML = '';
+    cams.forEach(cam => list.appendChild(renderCam(cam)));
+  })
+  .catch(() => { list.textContent = 'Could not load cameras.'; });
+
+function renderCam(cam) {
+  const el = document.createElement('div');
+  el.className = 'cam';
+  el.innerHTML = `
+    <h2><span class="dot ${cam.active ? 'live' : ''}"></span>${escapeHtml(cam.name)}</h2>
+    <div class="field">
+      <label>Stream Source URL</label>
+      <div class="row">
+        <input readonly value="${escapeAttr(cam.streamSource)}">
+        <button type="button">Copy</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Suggested name</label>
+      <div class="row">
+        <input readonly value="${escapeAttr(cam.suggestedName)}">
+        <button type="button">Copy</button>
+      </div>
+    </div>
+    <div class="field"><label>Still Image URL</label><span class="blank">leave blank</span></div>
+  `;
+  el.querySelectorAll('.row').forEach(row => {
+    const input = row.querySelector('input');
+    const btn = row.querySelector('button');
+    btn.addEventListener('click', () => copy(input, btn));
+  });
+  return el;
+}
+
+function copy(input, btn) {
+  const text = input.value;
+  const done = () => { btn.textContent = 'Copied'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1200); };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(done).catch(() => { input.select(); document.execCommand('copy'); done(); });
+  } else {
+    input.select(); document.execCommand('copy'); done();
+  }
+}
+
+function escapeHtml(s) { return s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+function escapeAttr(s) { return s.replace(/"/g, '&quot;'); }
+</script>
+</body>
+</html>

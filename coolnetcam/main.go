@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-//go:embed index.html
+//go:embed index.html setup.html
 var staticFS embed.FS
 
 const (
@@ -99,6 +99,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", app.handleIndex)
+	mux.HandleFunc("/setup", app.handleSetup)
 	mux.HandleFunc("/api/cameras", app.handleCameras)
 	mux.HandleFunc("/stream/", app.handleStream)
 
@@ -356,11 +357,46 @@ func trimPlaylist(playlist string, n int) string {
 	return b.String()
 }
 
+// cameraView is the public JSON shape, enriched with copy-paste-ready values
+// for the Home Assistant Generic Camera integration.
+type cameraView struct {
+	Name          string `json:"name"`
+	ChannelID     string `json:"channelId"`
+	Active        bool   `json:"active"`
+	StreamURL     string `json:"streamUrl"`     // relative; used by the built-in grid player
+	StreamSource  string `json:"streamSource"`  // absolute; paste into Generic Camera "Stream Source URL"
+	SuggestedName string `json:"suggestedName"` // paste into Generic Camera "Name"
+}
+
 func (a *App) handleCameras(w http.ResponseWriter, r *http.Request) {
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	base := scheme + "://" + r.Host
+
 	a.mu.RLock()
-	defer a.mu.RUnlock()
+	views := make([]cameraView, 0, len(a.cameras))
+	for _, c := range a.cameras {
+		views = append(views, cameraView{
+			Name:          c.Name,
+			ChannelID:     c.ChannelID,
+			Active:        c.Active,
+			StreamURL:     c.StreamURL,
+			StreamSource:  base + c.StreamURL,
+			SuggestedName: "Coolnet " + c.Name,
+		})
+	}
+	a.mu.RUnlock()
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(a.cameras)
+	json.NewEncoder(w).Encode(views)
+}
+
+func (a *App) handleSetup(w http.ResponseWriter, r *http.Request) {
+	data, _ := staticFS.ReadFile("setup.html")
+	w.Header().Set("Content-Type", "text/html")
+	w.Write(data)
 }
 
 func (a *App) handleIndex(w http.ResponseWriter, r *http.Request) {

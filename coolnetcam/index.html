@@ -52,10 +52,24 @@
     inset: 0;
     z-index: 100;
   }
+  .setup-link {
+    position: fixed;
+    bottom: 10px;
+    right: 14px;
+    z-index: 200;
+    background: rgba(0,0,0,0.6);
+    color: #eee;
+    text-decoration: none;
+    padding: 5px 11px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .setup-link:hover { background: rgba(0,0,0,0.85); }
 </style>
 </head>
 <body>
 <div class="grid" id="grid"></div>
+<a href="/setup" class="setup-link">⚙ Add to Home Assistant</a>
 <script>
 const grid = document.getElementById('grid');
 

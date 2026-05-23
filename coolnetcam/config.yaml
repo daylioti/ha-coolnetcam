@@ -1,5 +1,5 @@
 name: Coolnet Cam
-version: "1.0.0"
+version: "1.1.0"
 slug: coolnetcam
 description: Coolnet camera login + keepalive + low-latency HLS proxy
 url: https://github.com/daylioti/ha-coolnetcam

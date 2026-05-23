@@ -26,10 +26,16 @@ will refuse to start until both are set.
 
 ## Add the cameras to Home Assistant (Generic Camera, one per stream)
 
-For each entry from `/api/cameras`:
+**Easiest:** open the Web UI and click **⚙ Add to Home Assistant** (or visit
+`http://<HA-IP>:8090/setup`). It lists every camera with a **Copy** button for the
+exact **Stream Source URL** to paste — no hand-building URLs. The `/api/cameras`
+JSON also includes a ready-to-use `streamSource` field for each camera.
+
+Then, for each camera:
 
 - **Settings → Devices & Services → Add Integration → Generic Camera**
-- **Stream Source URL:** `http://<HA-IP>:8090/stream/<channelId>/stream.m3u8`
+- **Stream Source URL:** paste from the Setup page
+  (`http://<HA-IP>:8090/stream/<channelId>/stream.m3u8`)
 - **Still Image URL:** leave blank (derived from stream)
 - Name it (e.g. `Coolnet Front`)
 
